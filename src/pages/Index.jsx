@@ -48,7 +48,7 @@ const Index = () => {
     <Container centerContent maxW="container.md" py={8}>
       <VStack spacing={4} width="100%">
         <Heading as="h1" size="xl">
-          Accessibility Checklist
+          Accessibility Checklist V1
         </Heading>
         <HStack width="100%">
           <Input placeholder="Enter project name" value={projectName} onChange={handleProjectNameChange} />
