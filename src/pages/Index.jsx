@@ -12,10 +12,16 @@ const defaultChecklist = [
 
 const Index = () => {
   const [projectName, setProjectName] = useState("");
-  const [checklist, setChecklist] = useState(defaultChecklist);
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   const handleCheckboxChange = (id) => {
-    setChecklist(checklist.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item)));
+    if (selectedProject) {
+      const updatedChecklist = selectedProject.checklist.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item));
+      const updatedProject = { ...selectedProject, checklist: updatedChecklist };
+      setProjects(projects.map((project) => (project.name === selectedProject.name ? updatedProject : project)));
+      setSelectedProject(updatedProject);
+    }
   };
 
   const handleProjectNameChange = (e) => {
@@ -24,13 +30,19 @@ const Index = () => {
 
   const handleAddProject = () => {
     if (projectName.trim() !== "") {
+      const newProject = {
+        name: projectName,
+        checklist: defaultChecklist.map((item) => ({ ...item, checked: false })),
+      };
+      setProjects([...projects, newProject]);
+      setSelectedProject(newProject);
       setProjectName("");
     }
   };
 
-  const totalItems = checklist.length;
-  const checkedItems = checklist.filter((item) => item.checked).length;
-  const progress = (checkedItems / totalItems) * 100;
+  const totalItems = selectedProject ? selectedProject.checklist.length : 0;
+  const checkedItems = selectedProject ? selectedProject.checklist.filter((item) => item.checked).length : 0;
+  const progress = selectedProject ? (checkedItems / totalItems) * 100 : 0;
 
   return (
     <Container centerContent maxW="container.md" py={8}>
@@ -45,24 +57,28 @@ const Index = () => {
           </Button>
         </HStack>
         <Divider />
-        <Box width="100%">
-          <Text fontSize="lg" mb={4}>
-            Project: {projectName || "No project selected"}
-          </Text>
-          <Progress value={progress} size="lg" colorScheme="teal" mb={4} />
-          <Text mb={4}>
-            {checkedItems} of {totalItems} items checked ({progress.toFixed(2)}%)
-          </Text>
-          <VStack align="start" spacing={3}>
-            {checklist.map((item) => (
-              <HStack key={item.id} width="100%">
-                <Checkbox isChecked={item.checked} onChange={() => handleCheckboxChange(item.id)}>
-                  {item.text} ({item.type})
-                </Checkbox>
-              </HStack>
-            ))}
-          </VStack>
-        </Box>
+        {selectedProject ? (
+          <Box width="100%">
+            <Text fontSize="lg" mb={4}>
+              Project: {selectedProject.name}
+            </Text>
+            <Progress value={progress} size="lg" colorScheme="teal" mb={4} />
+            <Text mb={4}>
+              {checkedItems} of {totalItems} items checked ({progress.toFixed(2)}%)
+            </Text>
+            <VStack align="start" spacing={3}>
+              {selectedProject.checklist.map((item) => (
+                <HStack key={item.id} width="100%">
+                  <Checkbox isChecked={item.checked} onChange={() => handleCheckboxChange(item.id)}>
+                    {item.text} ({item.type})
+                  </Checkbox>
+                </HStack>
+              ))}
+            </VStack>
+          </Box>
+        ) : (
+          <Text>No project selected</Text>
+        )}
       </VStack>
     </Container>
   );
